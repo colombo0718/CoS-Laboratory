@@ -4,32 +4,41 @@
     <title>CoS-Labs</title>
     <meta charset="utf-8">
     <base href="app://./" />
+    <style>
+        body {
+            margin: 0;
+            background-color: #000;
+        }
+    </style>
 </head>
 <body>
-    <input type="button" value="返回主頁面" onClick="history.back()">
     <div id="cont"></div>
     <script type="module">
         import * as THREE from './COS.js/three.js/three.module.js';
         import { MTLLoader } from './COS.js/three.js/MTLLoader.js';
-        import { OBJLoader } from './COS.js/three.js/OBJLoader.js';    
+        import { OBJLoader } from './COS.js/three.js/OBJLoader.js';   
+
         var container, renderer;
+        var scene, camera, light;
+
         function init() {
-            // renderer
+            //
             renderer = new THREE.WebGLRenderer();
             renderer.setPixelRatio( window.devicePixelRatio );
-            renderer.setSize( window.innerWidth*.8, window.innerHeight*.7);
+            renderer.setSize( window.innerWidth*.9, window.innerHeight*.9);
+
             container = document.getElementById( 'cont' );
             document.body.appendChild( container );
             container.appendChild( renderer.domElement );
 
-            var scene=new THREE.Scene();
-            var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight,0.1, 2000 );
-            camera.position.set(3,20,-20)
-            camera.rotateY(-Math.PI)
-            camera.rotateX(-2*Math.PI/8)
+            scene=new THREE.Scene();
+            light = new THREE.AmbientLight( 0xffffff,1);
+            camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight,0.1, 2000 );
+            camera.position.set(10,10,-10)
+            camera.lookAt(0,  0,  0)
+            
+            scene.add( light );
             scene.add( camera );
-
-            renderer.render( scene,camera);
 
             new MTLLoader()
                 .setPath( './tiles/' )
@@ -38,18 +47,15 @@
                         .setMaterials( materials )
                         .setPath( './tiles/' )
                         .load('soil.obj', function ( tile ) {
-                            console.log(tile)
-                            tile.name=name
-                            tile.scale.set(.25,.25,.25)
-                            tile.position.x=0
-                            tile.position.z=0
                             scene.add(tile)
                         })
-
                 })
-
-            renderer.render( scene,camera);
         }
+
         init()
+
+        setInterval(function(){
+            renderer.render( scene,camera);
+        },1000)
     </script>
 </body>
