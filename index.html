@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>CommandOfStrategy</title>
+        <meta charset="utf-8">
+        <link type='text/css' rel='stylesheet' href='./main-cos.css'>
+        <base href="app://./" />
+               
+	</head>
+
+	<body>
+        <div id="cont"></div>
+
+        <div id="menu" class="ui"> <h4>[選單]</h4>
+            <p>== 關卡 ==</p>
+        </div>
+
+        <div id="info" class="ui"><h4>[資訊]</h4>
+            <br><p>== 天 ==</p>
+                <p>局勢：藍軍<br>時辰：卯時<br>天氣：晴朗</p><br>
+            <br><p>== 地 ==</p>
+                <p>地質：<font id='gnd-name'></font></p>
+                <p>位置：<font id='gnd-posi'></font></p>
+            <br><p>== 人 ==</p>
+                <p>職業：<font id='career'></font></p>
+                <p>姓名：<font id='cha-name'></font></p>
+                <p>位置：<font id='cha-posi'></font></p>
+                <p>血量：<font id='health'></font></p>
+                <p>體力：<font id='stamina'></font></p>
+                <p>命令：<font id='orders'></font></p>
+                <p>技能：<font id='skills'></font></p>
+            
+            <br><p>== 物 ==</p>
+                <p>品項：<font id='obj-name'></font></p>
+                <p>位置：<font id='obj-posi'></font></p>
+        </div>
+
+
+        <div id="dial" class="ui" ><h4>[對話]</h4>
+            <p><div id='logs'>主帥：對戰開始<br></div></p>
+            <p style="position:absolute; bottom:0px; width:100%; font-weight:bold;">
+                指令:<input type="text" id='inputArea'>
+                <button>Enter</button>
+            </p>
+        </div>
+        
+		<script type="module">
+            let {shell} = require('electron');
+            
+            // three.js module
+            
+			import * as THREE from './COS.js/three.js/three.module.js';
+            import { Compaign } from './COS.js/Compaign.js'; 
+
+			var container, renderer;
+            var clock = new THREE.Clock();
+            var inputArea=document.getElementById("inputArea")
+            var focusMan,focusObj,focusGnd,TouchPosi
+            // var epic = new Compaign('train')  
+            var epic = new Compaign('basic')  
+            var inputAreaFocus=false,showMenu=true
+
+            // document.getElementById("commandButton").addEventListener(
+            //     'click',function(){
+            //         console.log(this.innerHTML)
+            //         commandLine.value+=this.innerHTML
+            //     }
+            // )            
+
+			function init() {
+                // renderer
+                renderer = new THREE.WebGLRenderer();
+                renderer.setPixelRatio( window.devicePixelRatio );
+                renderer.setSize( window.innerWidth*.8, window.innerHeight*.7);
+                container = document.getElementById( 'cont' );
+                document.body.appendChild( container );
+                container.appendChild( renderer.domElement );
+
+                document.oncontextmenu = new Function("return false;");
+                document.getElementById('cont').addEventListener('mousedown',onMouseDrag,false)
+                document.getElementById('cont').addEventListener('mousemove',onMouseDrag,false)
+                document.getElementById('cont').addEventListener('wheel',onMouseDrag,false)
+                window.addEventListener('resize',onWindowResize,false)
+                document.addEventListener('keyup',onKeyPress,false)
+                inputArea.addEventListener("focusin",function(){inputAreaFocus=true})
+                inputArea.addEventListener("focusout",function(){inputAreaFocus=false})
+            }
+
+            function onMouseDrag(event){
+                // move camera -----------------------
+                if(event.deltaY>0 && epic.camera.position.y<50){
+                    epic.camera.position.y+=1
+                    epic.camera.position.z-=1
+                }
+                if(event.deltaY<0 && epic.camera.position.y>2){
+                    epic.camera.position.y-=1
+                    epic.camera.position.z+=1
+                }
+                if(event.which==3){
+                    epic.camera.position.x+=event.movementX/50
+                    epic.camera.position.z+=event.movementY/50
+                }
+                // raycaster ------------------
+                var raycaster = new THREE.Raycaster();
+                var mouse = new THREE.Vector2();
+                mouse.x = ( event.clientX / (window.innerWidth*.8) ) * 2 - 1;
+                mouse.y = - ( event.clientY / (window.innerHeight*.7) ) * 2 + 1;
+                raycaster.setFromCamera( mouse, epic.camera );
+                var intersects = raycaster.intersectObjects( epic.terrain.sensors.children)
+                if(intersects.length==1){
+                    if(TouchPosi!=intersects[0].object){
+                        if(TouchPosi){TouchPosi.material.opacity=0}
+                        TouchPosi=intersects[0].object
+                        TouchPosi.material.opacity=.5
+                    }
+                }
+                // when mouse click ----------------------
+                if(event.which==1){
+                    if(epic.howIsThere(TouchPosi.position)){
+                        if(focusGnd){focusGnd.hideSeletor()}
+                        focusGnd=epic.howIsThere(TouchPosi.position)
+                        focusGnd.showSeletor(0xffff00)
+                        // console.log(focusGnd.name)
+                        document.getElementById('gnd-name').innerHTML=focusGnd.name
+                        document.getElementById('gnd-posi').innerHTML=focusGnd.position.toArray()
+                    }
+                    if(epic.whoIsThere(TouchPosi.position)){
+                        if(focusMan){focusMan.hideSeletor()}
+                        focusMan=epic.whoIsThere(TouchPosi.position)
+                        focusMan.showSeletor(0xff00ff)
+                        // console.log(focusMan)
+                        document.getElementById('career').innerHTML=focusMan.career
+                        document.getElementById('cha-name').innerHTML=focusMan.name
+                        document.getElementById('cha-posi').innerHTML=focusMan.position.toArray()
+                        document.getElementById('health').innerHTML=focusMan.health
+                        document.getElementById('stamina').innerHTML=focusMan.stamina
+                        document.getElementById('orders').innerHTML='<br>'
+                        focusMan.orders.forEach(function(ord){
+                            document.getElementById('orders').innerHTML+="<button>"+ord.key+"</button>-"+ord.name+'<br>'
+                        })
+                        document.getElementById('skills').innerHTML='<br>'
+                        focusMan.skills.forEach(function(ski){
+                            document.getElementById('skills').innerHTML+="<button>"+ski.command+"</button>-"+ski.name+'<br>'
+                        })
+                    }
+                    if(epic.whaIsThere(TouchPosi.position)){
+                        if(focusObj){focusObj.hideSeletor()}
+                        focusObj=epic.whaIsThere(TouchPosi.position)
+                        focusObj.showSeletor(0x00ffff)
+                        // console.log(focusObj)
+                        document.getElementById('obj-name').innerHTML=focusObj.name
+                        document.getElementById('obj-posi').innerHTML=focusObj.position.toArray()
+                    }
+                }
+            }
+
+            function onWindowResize(){
+                epic.camera.aspect=window.innerWidth/window.innerHeight
+                epic.camera.updateProjectionMatrix()
+                renderer.setSize(window.innerWidth*.8,window.innerHeight*.7)
+            }
+
+            function onKeyPress(event){
+                if(event.key=="Escape"){
+                    // console.log(shell)
+                    shell.openExternal('addATile.html')
+                    if(showMenu){
+                        document.getElementById('menu').style.top="-40%"
+                        showMenu=false
+                    }else{
+                        document.getElementById('menu').style.top="15%"
+                        showMenu=true
+                    }
+                    return
+                }
+
+                if(!inputAreaFocus){
+                    epic.getSingleInput(epic.trend,event.key,focusMan)
+                    if(epic.error){
+                        document.getElementById('logs').innerHTML
+                        ="主帥:"+epic.error+"<br>"
+                        +document.getElementById('logs').innerHTML
+                        console.log(epic.error)
+                    }
+                    else{console.log(epic.getChaStates())}
+                }               
+            }
+
+            // var lab01 = document.getElementById('lab01');
+
+            // lab01.onclick = function (e) {
+            //     console.log(lab01)
+            //     // 阻止預設事件
+            //     e.preventDefault();
+            //     // 通過 shell 開啟連結
+            //     shell.openExternal('./labs/addATile.html')
+            // }
+
+            // setInterval(function(){
+            //     // if(epic.trend==1){
+            //         if(epic.underControl){
+            //             var rand=Math.floor(Math.random()*epic.underControl.orders.length)
+            //             console.log(epic.underControl.orders[rand].key)
+            //             epic.getSingleInput(epic.trend,epic.underControl.orders[rand].key,focusMan)
+            //         }else{
+            //             var rand=Math.floor(Math.random()*epic.attend[epic.trend].chars.length)
+            //                 if(epic.attend[epic.trend].chars[rand].stamina>0){
+            //                     epic.underControl=epic.attend[epic.trend].chars[rand]
+            //                     return
+            //                 }
+                        
+            //         }
+            //     // }
+            // },500)
+
+			function animate() {				
+                var delta = clock.getDelta();            
+                epic.peoples.children.forEach(function(element) {
+                    if(element.mixer!=undefined){
+                        element.mixer.update(delta)
+                    }
+                });
+                renderer.render( epic, epic.camera );
+                requestAnimationFrame( animate );
+            }
+
+            init();
+            animate();
+            
+        </script>
+	</body>
+</html>
