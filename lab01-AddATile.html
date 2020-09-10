@@ -1,24 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <title>CoS-Labs</title>
-    <meta charset="utf-8">
     <base href="app://./" />
-    <style>
-        body {
-            margin: 0;
-            background-color: #000;
-        }
-    </style>
 </head>
 <body>
     <div id="cont"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"> </script>
     <script type="module">
         import * as THREE from './COS.js/three.js/three.module.js';
         import { MTLLoader } from './COS.js/three.js/MTLLoader.js';
         import { OBJLoader } from './COS.js/three.js/OBJLoader.js';
-        console.log(tf)  
 
         var container, renderer;
         var scene, camera, light;
@@ -26,11 +17,9 @@
         function init() {
             //
             renderer = new THREE.WebGLRenderer();
-            renderer.setPixelRatio( window.devicePixelRatio );
-            renderer.setSize( window.innerWidth*.9, window.innerHeight*.9);
+            renderer.setSize( window.innerWidth, window.innerHeight);
 
             container = document.getElementById( 'cont' );
-            document.body.appendChild( container );
             container.appendChild( renderer.domElement );
 
             scene=new THREE.Scene();
@@ -43,12 +32,10 @@
             scene.add( camera );
 
             new MTLLoader()
-                .setPath( './tiles/' )
-                .load('soil.mtl', function ( materials ) {
+                .load('./tiles/soil.mtl', function ( materials ) {
                     new OBJLoader()
                         .setMaterials( materials )
-                        .setPath( './tiles/' )
-                        .load('soil.obj', function ( tile ) {
+                        .load('./tiles/soil.obj', function ( tile ) {
                             scene.add(tile)
                         })
                 })
