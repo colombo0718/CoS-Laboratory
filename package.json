@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/colombo0718/CoS-Laboratory#readme",
   "dependencies": {
-    "electron": "^6.0.11"
+    "electron": "^6.0.11",
+    "vox.js": "^1.0.0"
   }
 }

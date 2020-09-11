@@ -151,7 +151,8 @@ async function createWindow() {
     win.webContents.openDevTools()
 
     // und Laden der index.html der App.
-    win.loadFile('lab01-AddATile.html')
+    // win.loadFile('lab01-AddATile.html')
+    win.loadFile('readVox.html')
 
     // Ausgegeben, wenn das Fenster geschlossen wird.
     win.on('closed', () => {

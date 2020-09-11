@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CoS-Labs</title>
+    <base href="app://./" />
+    <script src="node_modules/vox.js/build/vox.js"></script>
+</head>
+<body>
+    <div id="cont"></div>
+    <script type="module">
+        console.log(vox)
+        var parser = new vox.Parser();
+        parser.parse("./tiles/water.vox").then(function(voxelData) {
+            
+            voxelData.voxels; // voxel position and color data
+            voxelData.size; // model size
+            voxelData.palette; // palette data
+
+        });
+    </script>
+</body>
