@@ -152,7 +152,7 @@ async function createWindow() {
 
     // und Laden der index.html der App.
     // win.loadFile('lab01-AddATile.html')
-    win.loadFile('readVox.html')
+    win.loadFile('lab02-MoveField.html')
 
     // Ausgegeben, wenn das Fenster geschlossen wird.
     win.on('closed', () => {
