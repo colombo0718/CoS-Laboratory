@@ -19,13 +19,13 @@
             [1,1,1,1,1],
             [1,1,1,1,1],
             [1,1,1,1,1],
-            [1,1,1,1,1]]
+            [1,1,1,1,1,1]]
         var t0
 
         function init() {
             //
             renderer = new THREE.WebGLRenderer();
-            renderer.setSize( window.innerWidth, window.innerHeight);
+            renderer.setSize( window.innerWidth*.9, window.innerHeight*.9);
 
             container = document.getElementById( 'cont' );
             container.appendChild( renderer.domElement );
@@ -39,6 +39,10 @@
             
             scene.add( light );
             scene.add( camera );
+
+            document.getElementById('cont').addEventListener('mousedown',onMouseDrag,false)
+            document.getElementById('cont').addEventListener('mousemove',onMouseDrag,false)
+            document.getElementById('cont').addEventListener('wheel',onMouseDrag,false)
 
             for(var j=0;j<map.length;j++){
                 for(var i=0;i<map[0].length;i++){
@@ -60,11 +64,39 @@
                 })
         }
 
+        function onMouseDrag(event){
+            // move camera -----------------------
+            if(event.deltaY>0 && camera.position.y<50){
+                camera.position.y+=1
+                camera.position.z-=1
+            }
+            if(event.deltaY<0 && camera.position.y>2){
+                camera.position.y-=1
+                camera.position.z+=1
+            }
+            if(event.which==3){
+                camera.position.x+=event.movementX/50
+                camera.position.z+=event.movementY/50
+            }
+        }
+
         init()
 
-        setInterval(function(){
-            renderer.render( scene,camera);
-            // console.log(t0,tileList[0])
-        },1000)
+        // setInterval(function(){
+        //     renderer.render( scene,camera);
+        //     // console.log(t0,tileList[0])
+        // },50)
+
+        function animate() {				
+            // var delta = clock.getDelta();            
+            // epic.peoples.children.forEach(function(element) {
+            //     if(element.mixer!=undefined){
+            //         element.mixer.update(delta)
+            //     }
+            // });
+            renderer.render( scene, camera );
+            requestAnimationFrame( animate );
+        }
+        animate()
     </script>
 </body>
