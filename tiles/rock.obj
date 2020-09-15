@@ -4,7 +4,7 @@
 o 
 
 # material
-mtllib water.mtl
+mtllib rock.mtl
 usemtl palette
 
 # normals
@@ -16,8 +16,8 @@ vn 0 -1 0
 vn 0 1 0
 
 # texcoords
-vt 0.779297 0.5
-vt 0.806641 0.5
+vt 0.970703 0.5
+vt 0.978516 0.5
 
 # verts
 v -2 -2 2

@@ -14,10 +14,12 @@
         var container, renderer;
         var scene, camera, light;
 
+        var tileList=[]
         var map=[
             [1,1,1,1,1],
             [1,1,1,1,1],
             [1,1,1,1,1]]
+        var t0
 
         function init() {
             //
@@ -30,51 +32,61 @@
             scene=new THREE.Scene();
             light = new THREE.AmbientLight( 0xffffff,1);
             camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight,0.1, 2000 );
-            camera.position.set(10,20,-20)
+            camera.position.set(3,20,-20)
             camera.rotateY(-Math.PI)
             camera.rotateX(-2*Math.PI/8)
             
             scene.add( light );
             scene.add( camera );
 
+            document.getElementById('cont').addEventListener('mousedown',onMouseDrag,false)
+            document.getElementById('cont').addEventListener('mousemove',onMouseDrag,false)
+            document.getElementById('cont').addEventListener('wheel',onMouseDrag,false)
+
             for(var j=0;j<map.length;j++){
                 for(var i=0;i<map[0].length;i++){
                     addTile(i,j)
                 }
             }
-
-            document.getElementById('cont').addEventListener('mousedown',onMouseDrag,false)
-            document.getElementById('cont').addEventListener('mousemove',onMouseDrag,false)
-            document.getElementById('cont').addEventListener('wheel',onMouseDrag,false)
-
+            // for(var j=0;j<map.length;j++){
+            //     for(var i=0;i<map[0].length;i++){
+            //         addTile02(i,j)
+            //     }
+            // }
         }
 
         var addTile=function(i,j){
             new MTLLoader()
-                .load('./tiles/soil.mtl', function ( materials ) {
+                .load('./tiles/rock.mtl', function ( materials ) {
+                    materials.transparent=true
+		            materials.opacity=0
                     new OBJLoader()
                         .setMaterials( materials )
-                        .load('./tiles/soil.obj', function ( tile ) {
+                        .load('./tiles/rock.obj', function ( tile ) {
                             tile.position.set(i,0,j)
                             tile.scale.set(.25,.25,.25)
+                            tile.children[0].material.transparent=true
+                            tile.children[0].material.opacity=1
+                            console.log(tile)
                             scene.add(tile)
                         })
                 })
         }
 
+
+
         function onMouseDrag(event){
             // move camera -----------------------
-            if(event.deltaY>0){
+            if(event.deltaY>0 && camera.position.y<50){
                 camera.position.y+=1
                 camera.position.z-=1
             }
-            if(event.deltaY<0){
+            if(event.deltaY<0 && camera.position.y>2){
                 camera.position.y-=1
                 camera.position.z+=1
             }
             if(event.which==3){
                 camera.position.x+=event.movementX/50
-                console.log(event.movementX/50)
                 camera.position.z+=event.movementY/50
             }
         }
