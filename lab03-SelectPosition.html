@@ -95,6 +95,20 @@
                 camera.position.x+=event.movementX/50
                 camera.position.z+=event.movementY/50
             }
+            // raycaster ------------------
+            var raycaster = new THREE.Raycaster();
+                var mouse = new THREE.Vector2();
+                mouse.x = ( event.clientX / (window.innerWidth*.8) ) * 2 - 1;
+                mouse.y = - ( event.clientY / (window.innerHeight*.7) ) * 2 + 1;
+                raycaster.setFromCamera( mouse, epic.camera );
+                var intersects = raycaster.intersectObjects( epic.terrain.sensors.children)
+                if(intersects.length==1){
+                    if(TouchPosi!=intersects[0].object){
+                        if(TouchPosi){TouchPosi.material.opacity=0}
+                        TouchPosi=intersects[0].object
+                        TouchPosi.material.opacity=.5
+                    }
+                }
         }
 
         init()
