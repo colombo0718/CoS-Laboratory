@@ -16,9 +16,9 @@
 
         var tileList=[]
         var map=[
-            [1,1,1,1,1],
-            [1,1,1,1,1],
-            [1,1,1,1,1]]
+            [1,2,3,4,5],
+            [1,2,3,4,5],
+            [1,2,3,4,5]]
         var t0
 
         function init() {
@@ -45,28 +45,34 @@
 
             for(var j=0;j<map.length;j++){
                 for(var i=0;i<map[0].length;i++){
-                    addTile(i,j)
+                    addTile(i,j,map[j][i])
                 }
             }
-            // for(var j=0;j<map.length;j++){
-            //     for(var i=0;i<map[0].length;i++){
-            //         addTile02(i,j)
-            //     }
-            // }
         }
 
-        var addTile=function(i,j){
+        var addTile=function(i,j,type){
+            var name='soil',opac=1
+            switch(type){
+                case 2:
+                    name='gress';opac=1;break;
+                case 3:
+                    name='rock';opac=1;break;
+                case 4:
+                    name='water';opac=.5;break;
+                case 5:
+                    name='ice';opac=.9;break;
+            }
             new MTLLoader()
                 .load('./tiles/rock.mtl', function ( materials ) {
                     materials.transparent=true
 		            materials.opacity=0
                     new OBJLoader()
                         .setMaterials( materials )
-                        .load('./tiles/rock.obj', function ( tile ) {
+                        .load('./tiles/'+name+'.obj', function ( tile ) {
                             tile.position.set(i,0,j)
                             tile.scale.set(.25,.25,.25)
                             tile.children[0].material.transparent=true
-                            tile.children[0].material.opacity=1
+                            tile.children[0].material.opacity=opac
                             console.log(tile)
                             scene.add(tile)
                         })
