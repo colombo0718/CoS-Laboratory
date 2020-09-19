@@ -13,13 +13,13 @@
 
         var container, renderer;
         var scene, camera, light;
+        var sensors = new THREE.Group(),TouchPosi
 
         var tileList=[]
         var map=[
             [1,2,3,4,5],
             [1,2,3,4,5],
             [1,2,3,4,5]]
-        var t0
 
         function init() {
             //
@@ -38,6 +38,7 @@
             
             scene.add( light );
             scene.add( camera );
+            scene.add(sensors)
 
             document.getElementById('cont').addEventListener('mousedown',onMouseDrag,false)
             document.getElementById('cont').addEventListener('mousemove',onMouseDrag,false)
@@ -48,6 +49,7 @@
                     addTile(i,j,map[j][i])
                 }
             }
+
         }
 
         var addTile=function(i,j,type){
@@ -58,14 +60,15 @@
                 case 3:
                     name='rock';opac=1;break;
                 case 4:
-                    name='water';opac=.5;break;
-                case 5:
                     name='ice';opac=.9;break;
+                case 5:
+                    name='water';opac=.4;break;
             }
             new MTLLoader()
                 .load('./tiles/rock.mtl', function ( materials ) {
                     materials.transparent=true
-		            materials.opacity=0
+                    materials.opacity=0
+                    
                     new OBJLoader()
                         .setMaterials( materials )
                         .load('./tiles/'+name+'.obj', function ( tile ) {
@@ -73,42 +76,50 @@
                             tile.scale.set(.25,.25,.25)
                             tile.children[0].material.transparent=true
                             tile.children[0].material.opacity=opac
-                            console.log(tile)
                             scene.add(tile)
                         })
+
+                    new OBJLoader()
+                        .load( 'tiles/sensor_flat.obj', function ( object ) {
+                            object.children[0].position.set(i,0.01,j)
+                            object.children[0].scale.set(.25,.25,.25)
+                            object.children[0].material.color.set(0xff0000)
+                            object.children[0].material.transparent=true
+                            object.children[0].material.opacity=0
+                            sensors.add(object.children[0])
+                        });
                 })
         }
 
 
 
         function onMouseDrag(event){
-            // move camera -----------------------
-            if(event.deltaY>0 && camera.position.y<50){
-                camera.position.y+=1
-                camera.position.z-=1
+            // zoom
+            if(event.deltaY){
+                camera.position.y+=event.deltaY/200
+                camera.position.z-=event.deltaY/200
             }
-            if(event.deltaY<0 && camera.position.y>2){
-                camera.position.y-=1
-                camera.position.z+=1
-            }
+            // drag
             if(event.which==3){
                 camera.position.x+=event.movementX/50
                 camera.position.z+=event.movementY/50
             }
             // raycaster ------------------
             var raycaster = new THREE.Raycaster();
-                var mouse = new THREE.Vector2();
-                mouse.x = ( event.clientX / (window.innerWidth*.8) ) * 2 - 1;
-                mouse.y = - ( event.clientY / (window.innerHeight*.7) ) * 2 + 1;
-                raycaster.setFromCamera( mouse, epic.camera );
-                var intersects = raycaster.intersectObjects( epic.terrain.sensors.children)
-                if(intersects.length==1){
-                    if(TouchPosi!=intersects[0].object){
-                        if(TouchPosi){TouchPosi.material.opacity=0}
-                        TouchPosi=intersects[0].object
-                        TouchPosi.material.opacity=.5
-                    }
+            var mouse = new THREE.Vector2();
+            mouse.x = ( event.clientX / (window.innerWidth*.9) ) * 2 - 1;
+            mouse.y = - ( event.clientY / (window.innerHeight*.9) ) * 2 + 1;
+            raycaster.setFromCamera( mouse,camera );
+            // console.log(sensors)
+            var intersects = raycaster.intersectObjects(sensors.children)
+            console.log(intersects)
+            if(intersects.length==1){
+                if(TouchPosi!=intersects[0].object){
+                    if(TouchPosi){TouchPosi.material.opacity=0}
+                    TouchPosi=intersects[0].object
+                    TouchPosi.material.opacity=.5
                 }
+            }
         }
 
         init()
